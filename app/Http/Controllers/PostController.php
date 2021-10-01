@@ -3,17 +3,27 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Posts;
 
 class PostController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+    
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        return view('posts');
+        if ($request->ajax()) {
+            return Posts::where('user_id', auth()->id())->get();
+        } else {
+            return view('posts')->with('state', 'index');
+        }
     }
 
     /**
@@ -23,7 +33,7 @@ class PostController extends Controller
      */
     public function create()
     {
-        //
+        return view('posts')->with('state', 'create');
     }
 
     /**
@@ -34,7 +44,13 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $post = new Posts();
+        $post->title = $request->title;
+        $post->content = $request->content;
+        $post->user_id = auth()->id();
+        $post->save();
+
+        return $post;
     }
 
     /**
@@ -43,9 +59,13 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        //
+        if ($request->ajax()) {
+            return Posts::where('user_id', auth()->id())->where('id', $id)->get();
+        } else {
+            return view('posts')->with('state', 'show')->with('id', $id);
+        }
     }
 
     /**
@@ -56,7 +76,7 @@ class PostController extends Controller
      */
     public function edit($id)
     {
-        //
+        return view('posts')->with('state', 'edit')->with('id', $id);
     }
 
     /**
@@ -68,7 +88,12 @@ class PostController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $post = Posts::find($id);
+        $post->title = $request->title;
+        $post->content = $request->content;
+        $post->save();
+
+        return $post;
     }
 
     /**
@@ -79,6 +104,9 @@ class PostController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $post = Posts::find($id);
+        $post->delete();
+
+        return $post;
     }
 }

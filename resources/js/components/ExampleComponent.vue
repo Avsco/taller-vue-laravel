@@ -16,8 +16,10 @@
 
 <script>
 export default {
-    mounted() {
-        console.log("Component mounted.");
+    async mounted() {
+        const response = await axios.get("/posts");
+        const data = response.data;
+        console.log(data);
     }
 };
 </script>
